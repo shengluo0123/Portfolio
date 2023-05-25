@@ -1,0 +1,453 @@
+#clustering
+```{r}
+library(ggplot2)
+library(dplyr)
+setwd("/Users/shuhanzhang/Desktop/cleaned dataset")
+data <- read.csv("review.csv")
+data
+data <- filter(data, funny <= 10)
+data <- filter(data, stars <= 10)
+data <- filter(data, useful <= 10)
+data <- filter(data, cool <= 10)
+```
+
+```{r}
+# Select the columns to be used for clustering
+cluster_data <- data[,c(3:7)]
+# Normalize the data
+normalized_data <- scale(cluster_data[,c(2:5)])
+normalized_data
+# Determine the optimal number of clusters using the elbow method
+wss <- (nrow(normalized_data)-1)*sum(apply(normalized_data,2,var))
+for (i in 2:10) wss[i] <- sum(kmeans(normalized_data, centers=i)$withinss)
+plot(1:10, wss, type="b", xlab="Number of Clusters", ylab="Within groups sum of squares")
+```
+
+```{r}
+setwd("/Users/shuhanzhang/Desktop/cleaned dataset")
+dat = read.csv("business.csv")
+
+library(dplyr)
+
+#"Top 10 Business by Yelp Rating"
+set.seed(123)
+yelp_data_subset <- dat %>% 
+  sample_n(size = round(0.001 * nrow(.)))
+
+yelp_data_top10 <- yelp_data_subset %>% 
+  top_n(n = 10, wt = stars)
+
+ggplot(yelp_data_top10, aes(x = name, y = stars, color = factor(stars))) +
+  geom_point(alpha = 0.5, size = 5)+
+  scale_color_discrete(name = "Stars") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),plot.subtitle = element_text(size = 8)) +
+  coord_flip()+
+  labs(title = "Top 10 Business by Yelp Rating",
+       subtitle = "Cuts N Blessings, Drip Hot Yoga, and Baby Company have higher prices and ratings.")
+
+```
+
+```{r}
+# Based on the plot, choose the optimal number of clusters (e.g., 4)
+num_clusters <- 2
+
+# Run k-means clustering algorithm
+kmeans_clusters <- kmeans(normalized_data, centers=num_clusters)
+
+# Add the cluster assignment to the original data
+cluster_data$cluster <- as.factor(kmeans_clusters$cluster)
+
+# Visualize the clustering using scatter plots
+ggplot(cluster_data, aes(x=funny, y=cool, color=cluster)) + 
+  geom_point(size=3) + 
+  ggtitle("Clustering of Reviews") +
+  xlab("Funny") + ylab("Cool")+
+  xlim(0,15) + ylim(0,15)
+```
+
+```{r}
+# Based on the plot, choose the optimal number of clusters (e.g., 4)
+num_clusters <- 2
+
+# Run k-means clustering algorithm
+kmeans_clusters <- kmeans(normalized_data, centers=num_clusters)
+
+# Add the cluster assignment to the original data
+cluster_data$cluster <- as.factor(kmeans_clusters$cluster)
+
+# Visualize the clustering using scatter plots
+ggplot(cluster_data, aes(x=stars, y=useful, color=cluster)) + 
+  geom_point(size=3) + 
+  ggtitle("Clustering of Reviews") +
+  xlab("Stars") + ylab("useful")+
+  xlim(0,15) + ylim(0,15)
+```
+# cluster 1: funny and cool and very useful
+# cluster 2: not funny and cool, not useful
+```{r}
+cluster1_ids <- cluster_data %>% filter(cluster == 1) %>% select(business_id)
+cluster2_ids <- cluster_data %>% filter(cluster == 2) %>% select(business_id)
+cluster1_ids
+```
+
+```{r}
+set.seed(617)
+km = kmeans(x = normalized_data,centers=num_clusters)
+k_segments = km$cluster
+table(k_segments)
+```
+
+```{r}
+data = cbind(data,k_segments)
+data
+library(dplyr); library(ggplot2); library(tidyr)
+data %>%
+  select(stars:cool,k_segments)%>%
+  group_by(k_segments)%>%
+  summarize_all(function(x) round(mean(x,na.rm=T),2))%>%
+  gather(key = var,value = value,stars:cool)%>%
+  ggplot(aes(x=var,y=value,fill=factor(k_segments)))+
+  geom_col(position='dodge')+
+  coord_flip()
+```
+```{r}
+#recommend cluster1's businesses
+merged_data <- merge(cluster1_ids, dat, by="business_id")
+matched_names <- merged_data[merged_data$business_id %in% cluster1_ids$business_id, "name"]
+print(unique(matched_names))
+```
+
+
+#text mining & sentiment analysis
+```{r}
+knitr::opts_chunk$set(echo = TRUE)
+library(stringr)
+library(dplyr)
+setwd("/Users/shuhanzhang/Desktop/cleaned dataset")
+review = read.csv('review.csv')
+```
+
+```{R}
+#check the basic info of the review text
+review %>%
+  select(text)%>%
+  mutate(characters = nchar(text),
+         words = str_count(text,pattern='\\S+'),
+         sentences = str_count(text,pattern="[A-Za-z,;'\"\\s]+[^.!?]*[.?!]"))%>%
+  summarize_at(c('characters','words','sentences'),.funs = mean,na.rm=T)
+```
+
+```{R}
+shortest_review_index = which.min(str_count(string = review$text,pattern = '\\S+'))
+review$text[shortest_review_index]
+
+longest_review_index = which.max(str_count(string = review$text,pattern = '\\S+'))
+review$text[longest_review_index]
+```
+
+
+```{R}
+#calculate the relationship between the character, words, sentence with the final ratings
+
+r_characters = cor.test(nchar(review$text),review$stars)
+r_words = cor.test(str_count(string = review$text,pattern = '\\S+'),review$stars)
+r_sentences = cor.test(str_count(string = review$text,pattern = "[A-Za-z,;'\"\\s]+[^.!?]*[.?!]"),review$stars)
+correlations = data.frame(r = c(r_characters$estimate, r_words$estimate, r_sentences$estimate),p_value=c(r_characters$p.value, r_words$p.value, r_sentences$p.value))
+rownames(correlations) = c('Characters','Words','Sentences')
+correlations
+```
+
+```{R}
+#check whether Upper case or exclamation marks would have influence on the ratings
+percentUpper = 100*str_count(review$text,pattern='[A-Z]')/nchar(review$text)
+summary(percentUpper)
+percentExclamation = 100*str_count(review$text,pattern='!')/nchar(review$text)
+summary(percentExclamation)
+
+r_upper = cor.test(percentUpper,review$stars)
+r_exclamation = cor.test(percentExclamation,review$stars)
+correlations2 = data.frame(r = c(r_upper$estimate, r_exclamation$estimate),p_value=c(r_upper$p.value, r_exclamation$p.value))
+rownames(correlations2) = c('Upper Case','Exclamation Marks')
+correlations2
+
+```
+```{R}
+#check the high frequent words
+
+library(dplyr); library(tidytext); library(magrittr);library(ggplot2)
+review%>%
+  unnest_tokens(input = text, output = word)%>%
+  select(word)%>%
+  anti_join(stop_words)%>%
+  group_by(word)%>%
+  summarize(count = n())%>%
+  ungroup()%>%
+  arrange(desc(count))%>%
+  top_n(50)
+```
+
+```{R}
+library(dplyr); library(tidytext); library(magrittr);library(ggplot2)
+review%>%
+  unnest_tokens(input = text, output = word)%>%
+  select(word)%>%
+  anti_join(stop_words)%>%
+  group_by(word)%>%
+  summarize(count = n())%>%
+  ungroup()%>%
+  arrange(desc(count))%>%
+  top_n(50)%>%
+  ggplot(aes(x=reorder(word,count), y=count, fill=count))+
+    geom_col()+
+    xlab('words')+
+    coord_flip()
+```
+
+```{R}
+#tokenize each review into word count
+library(dplyr); library(tidytext)
+review %>%
+  select(review_id,text)%>%
+  group_by(review_id)%>%
+  unnest_tokens(output = word,input=text)%>%
+  ungroup()%>%
+  group_by(review_id)%>%
+  summarize(count = n())
+```
+#impact from positive words to the rates
+```{R}
+library(dplyr); library(tidytext)
+review %>%
+  select(review_id,text,stars)%>%
+  group_by(review_id, stars)%>%
+  unnest_tokens(output=word,input=text)%>%
+  ungroup()%>%
+  inner_join(get_sentiments('bing'))%>%
+  group_by(stars,sentiment)%>%
+  summarize(n = n())%>%
+  mutate(proportion = n/sum(n))
+```
+
+#visualize the impact from positive words to the rates
+```{R}
+library(ggplot2)
+library(ggthemes)
+review %>%
+  select(review_id,text,stars)%>%
+  group_by(review_id,stars)%>%
+  unnest_tokens(output=word,input=text)%>%
+  ungroup()%>%
+  inner_join(get_sentiments('bing'))%>%
+  group_by(stars,sentiment)%>%
+  summarize(n = n())%>%
+  mutate(proportion = n/sum(n))%>%
+  ggplot(aes(x=stars,y=proportion,fill=sentiment))+
+  geom_col()+
+  theme_economist()+
+  coord_flip()
+```
+#break down the proportion of positive words in each review text
+```{R}
+review%>%
+  group_by(review_id, stars)%>%
+  unnest_tokens(output = word, input = text)%>%
+  inner_join(get_sentiments('bing'))%>%
+  group_by(review_id,stars)%>%
+  summarize(positive_words = sum(sentiment=='positive'),
+            negative_words = sum(sentiment=='negative'),
+            proportion_positive = positive_words/(positive_words+negative_words))%>%
+  ungroup()
+```
+
+#using afinn sentiment to quantative the sentiment
+```{R}
+setwd("/Users/shuhanzhang/Desktop/cleaned dataset")
+afinn = read.csv('afinn.csv')
+review %>%
+  select(review_id,text)%>%
+  group_by(review_id)%>%
+  unnest_tokens(output=word,input=text)%>%
+  inner_join(afinn)%>%
+  summarize(reviewSentiment = mean(value))%>%
+  ungroup()%>%
+  summarize(min=min(reviewSentiment),
+            max=max(reviewSentiment),
+            median=median(reviewSentiment),
+            mean=mean(reviewSentiment))
+```
+#visulize the sentiment's distribution:
+```{R}
+library(ggthemes)
+review %>%
+  select(review_id,text)%>%
+  group_by(review_id)%>%
+  unnest_tokens(output=word,input=text)%>%
+  inner_join(afinn)%>%
+  summarize(reviewSentiment = mean(value))%>%
+  ungroup()%>%
+  ggplot(aes(x=reviewSentiment,fill=reviewSentiment>0))+
+  geom_histogram(binwidth = 0.1)+
+  scale_x_continuous(breaks=seq(-5,5,1))+
+  scale_fill_manual(values=c('tomato','seagreen'))+
+  guides(fill=F)+
+  theme_wsj()
+```
+
+```{R}
+#Expand sentiment for every reviews
+review %>%
+  select(review_id,text)%>%
+  group_by(review_id)%>%
+  unnest_tokens(output=word,input=text)%>%
+  inner_join(afinn)%>%
+  summarize(reviewSentiment = mean(value))%>%
+  ungroup()%>%
+  summarize(review_id,reviewSentiment)
+```
+
+```{R}
+##generate the reviews from one specific business with visualization by WordCloud
+
+library(tidyverse)
+library(tidytext)
+library(wordcloud)
+library(RColorBrewer)
+
+createWordCloud <- function(review) {
+  review %>%
+    unnest_tokens(word, text) %>%
+    anti_join(stop_words) %>%
+    count(word, sort = TRUE) %>%
+    #slice_max(n = 30) %>%
+    with(wordcloud(words = word, freq = n, max.words = 30, colors = brewer.pal(8, "Dark2")))
+}
+
+
+#generate the reviews from one specific business
+review %>%
+  filter(business_id == "7ATYjTIgM3jUlt4UM3IypQ") %>%
+  createWordCloud()
+```
+
+```{R}
+# extract the top 10 positive or negative words from the specific business
+library(tidyverse)
+library(tidytext)
+
+positiveWordsBarGraph <- function(SC) {
+  contributions <- SC %>%
+    unnest_tokens(word, text) %>%
+    count(word, sort = TRUE) %>%
+    ungroup() %>%
+    inner_join(afinn)%>%
+    group_by(word) %>%
+    summarize(occurrences = n(),
+              contribution = sum(value))
+
+  contributions %>%
+    top_n(20, abs(contribution)) %>%
+    mutate(word = reorder(word, contribution)) %>%
+    head(20) %>%
+    ggplot(aes(x = word, y = contribution, fill = contribution > 0)) +
+    geom_col(show.legend = FALSE) +
+    coord_flip() +
+    scale_fill_manual(values = c("#d7191c", "#2c7bb6")) +
+    theme_bw()
+}
+
+review %>%
+  filter(business_id == "7ATYjTIgM3jUlt4UM3IypQ") %>%
+  positiveWordsBarGraph()
+
+```
+
+```{R}
+#predictive models using TF features
+library(tm)
+corpus = Corpus(VectorSource(review$text))
+corpus = tm_map(corpus,FUN = content_transformer(tolower))
+corpus = tm_map(corpus,FUN = content_transformer(FUN = function(x)gsub(pattern = 'http[[:alnum:][:punct:]]*',replacement = ' ',x = x)))
+corpus = tm_map(corpus,FUN = removePunctuation)
+corpus = tm_map(corpus,FUN = removeWords,c(stopwords('english')))
+corpus = tm_map(corpus,FUN = stripWhitespace)
+
+#create a dictionary
+dict = findFreqTerms(DocumentTermMatrix(Corpus(VectorSource(review$text))),
+                     lowfreq = 0)
+dict_corpus = Corpus(VectorSource(dict))
+corpus = tm_map(corpus,FUN = stemDocument)
+
+dtm = DocumentTermMatrix(corpus)
+xdtm = removeSparseTerms(dtm,sparse = 0.95)
+xdtm = as.data.frame(as.matrix(xdtm))
+colnames(xdtm) = stemCompletion(x = colnames(xdtm),dictionary = dict_corpus,type='prevalent')
+colnames(xdtm) = make.names(colnames(xdtm))
+
+#Document term matrix-tfidf
+dtm_tfidf = DocumentTermMatrix(x=corpus,control = list(weighting=function(x) weightTfIdf(x,normalize=F)))
+xdtm_tfidf = removeSparseTerms(dtm_tfidf,sparse = 0.95)
+xdtm_tfidf = as.data.frame(as.matrix(xdtm_tfidf))
+colnames(xdtm_tfidf) = stemCompletion(x = colnames(xdtm_tfidf),dictionary = dict_corpus,type='prevalent')
+colnames(xdtm_tfidf) = make.names(colnames(xdtm_tfidf))
+sort(colSums(xdtm_tfidf),decreasing = T)
+
+
+review_data_tfidf = cbind(review_rating = review$stars,xdtm_tfidf)
+set.seed(617)
+split = sample(1:nrow(review_data_tfidf),size = 0.7*nrow(review_data_tfidf))
+train = review_data_tfidf[split,]
+test = review_data_tfidf[-split,]
+
+library(rpart); library(rpart.plot)
+tree = rpart(review_rating~.,train)
+rpart.plot(tree)
+
+pred_tree = predict(tree,newdata=test)
+rmse_tree = sqrt(mean((pred_tree - test$review_rating)^2)); rmse_tree
+
+reg = lm(review_rating~.,train)
+summary(reg)
+pred_reg = predict(reg, newdata=test)
+rmse_reg = sqrt(mean((pred_reg-test$review_rating)^2)); rmse_reg
+```
+
+#association rules
+```{r}
+setwd("/Users/shuhanzhang/Desktop/cleaned dataset")
+business <- read.csv("business.csv")
+business
+```
+
+```{r}
+library(dplyr)
+library(tidyverse)
+#library(qdap)
+business$categories = strsplit(business$categories, ",")
+business = cbind(business, mtabulate(business$categories))
+```
+
+```{r}
+business = business[,-c(1:19)]
+business 
+```
+```{r}
+library(dplyr)
+business <- subset(business, select = -c(Restaurants, Food))
+```
+
+```{r}
+business[] <- lapply(business, function(x) ifelse(x == 1, TRUE, FALSE))
+business
+```
+
+```{r}
+library(arules); library(arulesViz)
+rules_all = apriori(business,parameter=list(support=0.02,confidence=0.02))
+x=inspect(rules_all)
+x[order(x$confidence, decreasing = T),]
+```
+
+```{r}
+plot(rules_all[quality(rules_all)$support>0.02,], 
+     method="matrix", measure="lift", control=list(reorder='measure'), engine='3d')
+```
