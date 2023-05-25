@@ -1,0 +1,249 @@
+---
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+#Q1 #effect set.seed(329) n \<-100 y_0 \<- rnorm(n = n / 2, mean = 220,
+sd = 10) %\>% round(digits = 1) y_1 \<- rnorm(n = n / 2, mean = 225, sd
+= 10) %\>% round(digits = 1) experiment \<- tibble(y_0, y_1 )
+analyze_experiment \<- function(y_1, y_0) { t.test(x = y_1, y = y_0,
+alternative = 'greater') %\>% tidy() %\>% select(effect = estimate,
+lower_ci = conf.low, p = p.value) }
+
+with(experiment, analyze_experiment(y_1, y_0) )
+
+library(broom) set.seed(4172) B \<- 1000 n \<- 100 experiment \<-
+function(n = 100) { y_0 \<- rnorm(n = n / 2, mean = 220, sd = 10) %\>%
+round(digits = 1) y_1 \<- rnorm(n = n / 2, mean = 225, sd = 10) %\>%
+round(digits = 1) tibble(y_0, y_1 ) }
+
+d_rep \<- experiment(n = n \* B) %\>% mutate(i = rep(seq(B), each = 50)
+)
+
+results \<- d_rep %\>% group_by(i) %\>% summarise(
+analyze_experiment(y_1, y_0) )
+
+mean(results$p < 0.05) summary(results$effect)
+summary(results\$lower_ci)
+summary(results$p)
+
+#no effect set.seed(329) n \<-100 y_0 \<- rnorm(n = n / 2, mean = 220,
+sd = 10) %\>% round(digits = 1) y_1 \<- rnorm(n = n / 2, mean = 220, sd
+= 10) %\>% round(digits = 1) experiment \<- tibble(y_0, y_1 )
+analyze_experiment \<- function(y_1, y_0) { t.test(x = y_1, y = y_0,
+alternative = 'greater') %\>% tidy() %\>% select(effect = estimate,
+lower_ci = conf.low, p = p.value) }
+
+with(experiment, analyze_experiment(y_1, y_0) )
+
+library(broom) set.seed(4172) B \<- 1000 n \<- 100 experiment \<-
+function(n = 100) { y_0 \<- rnorm(n = n / 2, mean = 220, sd = 10) %\>%
+round(digits = 1) y_1 \<- rnorm(n = n / 2, mean = 220, sd = 10) %\>%
+round(digits = 1) tibble(y_0, y_1 ) }
+
+d_rep \<- experiment(n = n \* B) %\>% mutate(i = rep(seq(B), each = 50)
+)
+
+results \<- d_rep %\>% group_by(i) %\>% summarise(
+analyze_experiment(y_1, y_0) )
+
+mean(results$p < 0.05) summary(results$effect)
+summary(results\$lower_ci) #effect set.seed(329) n \<-100 y_0 \<-
+rnorm(n = n / 2, mean = 220, sd = 10) %\>% round(digits = 1) y_1 \<-
+rnorm(n = n / 2, mean = 225, sd = 10) %\>% round(digits = 1) experiment
+\<- tibble(y_0, y_1 ) analyze_experiment \<- function(y_1, y_0) {
+t.test(x = y_1, y = y_0, alternative = 'greater') %\>% tidy() %\>%
+select(effect = estimate, lower_ci = conf.low, p = p.value) }
+
+with(experiment, analyze_experiment(y_1, y_0) )
+
+library(broom) set.seed(4172) B \<- 1000 n \<- 100 experiment \<-
+function(n = 100) { y_0 \<- rnorm(n = n / 2, mean = 220, sd = 10) %\>%
+round(digits = 1) y_1 \<- rnorm(n = n / 2, mean = 225, sd = 10) %\>%
+round(digits = 1) tibble(y_0, y_1 ) }
+
+d_rep \<- experiment(n = n \* B) %\>% mutate(i = rep(seq(B), each = 50)
+)
+
+results \<- d_rep %\>% group_by(i) %\>% summarise(
+analyze_experiment(y_1, y_0) )
+
+mean(results$p < 0.05) summary(results$effect)
+summary(results\$lower_ci)
+
+#no effect set.seed(329) n \<-100 y_0 \<- rnorm(n = n / 2, mean = 220,
+sd = 10) %\>% round(digits = 1) y_1 \<- rnorm(n = n / 2, mean = 220, sd
+= 10) %\>% round(digits = 1) experiment \<- tibble(y_0, y_1 )
+analyze_experiment \<- function(y_1, y_0) { t.test(x = y_1, y = y_0,
+alternative = 'greater') %\>% tidy() %\>% select(effect = estimate,
+lower_ci = conf.low, p = p.value) }
+
+with(experiment, analyze_experiment(y_1, y_0) )
+
+library(broom) set.seed(4172) B \<- 1000 n \<- 100 experiment \<-
+function(n = 100) { y_0 \<- rnorm(n = n / 2, mean = 220, sd = 10) %\>%
+round(digits = 1) y_1 \<- rnorm(n = n / 2, mean = 220, sd = 10) %\>%
+round(digits = 1) tibble(y_0, y_1 ) }
+
+d_rep \<- experiment(n = n \* B) %\>% mutate(i = rep(seq(B), each = 50)
+)
+
+results \<- d_rep %\>% group_by(i) %\>% summarise(
+analyze_experiment(y_1, y_0) )
+
+mean(results$p < 0.05) summary(results$effect)
+summary(results\$lower_ci)
+
+#effect set.seed(329) n \<-100 y_0 \<- rnorm(n = n / 2, mean = 220, sd =
+10) %\>% round(digits = 1) y_1 \<- rnorm(n = n / 2, mean = 225, sd = 10)
+%\>% round(digits = 1) experiment \<- tibble(y_0, y_1 )
+analyze_experiment \<- function(y_1, y_0) { t.test(x = y_1, y = y_0,
+alternative = 'greater') %\>% tidy() %\>% select(effect = estimate,
+lower_ci = conf.low, p = p.value) }
+
+with(experiment, analyze_experiment(y_1, y_0) )
+
+library(broom) set.seed(4172) B \<- 1000 n \<- 100 experiment \<-
+function(n = 100) { y_0 \<- rnorm(n = n / 2, mean = 220, sd = 10) %\>%
+round(digits = 1) y_1 \<- rnorm(n = n / 2, mean = 225, sd = 10) %\>%
+round(digits = 1) tibble(y_0, y_1 ) }
+
+d_rep \<- experiment(n = n \* B) %\>% mutate(i = rep(seq(B), each = 50)
+)
+
+results \<- d_rep %\>% group_by(i) %\>% summarise(
+analyze_experiment(y_1, y_0) )
+
+mean(results$p < 0.05) summary(results$effect)
+summary(results\$lower_ci)
+
+#no effect set.seed(329) n \<-100 y_0 \<- rnorm(n = n / 2, mean = 220,
+sd = 10) %\>% round(digits = 1) y_1 \<- rnorm(n = n / 2, mean = 220, sd
+= 10) %\>% round(digits = 1) experiment \<- tibble(y_0, y_1 )
+analyze_experiment \<- function(y_1, y_0) { t.test(x = y_1, y = y_0,
+alternative = 'greater') %\>% tidy() %\>% select(effect = estimate,
+lower_ci = conf.low, p = p.value) }
+
+with(experiment, analyze_experiment(y_1, y_0) )
+
+library(broom) set.seed(4172) B \<- 1000 n \<- 100 experiment \<-
+function(n = 100) { y_0 \<- rnorm(n = n / 2, mean = 220, sd = 10) %\>%
+round(digits = 1) y_1 \<- rnorm(n = n / 2, mean = 220, sd = 10) %\>%
+round(digits = 1) tibble(y_0, y_1 ) }
+
+d_rep \<- experiment(n = n \* B) %\>% mutate(i = rep(seq(B), each = 50)
+)
+
+results \<- d_rep %\>% group_by(i) %\>% summarise(
+analyze_experiment(y_1, y_0) )
+
+mean(results$p < 0.05) summary(results$effect)
+summary(results\$lower_ci)
+
+#Q2 \# Effect set.seed(329) n \<-1000 \# total experiment sample size \#
+outcomes for control and treatment groups y_0 \<- rnorm(n = n / 2, mean
+= 220, sd = 10) %\>% round(digits = 1) y_1 \<- rnorm(n = n / 2, mean =
+222, sd = 10) %\>% round(digits = 1) experiment \<- tibble(y_0, y_1 ) \#
+function to run statistical test within function \# and grab same
+results as in notes analyze_experiment \<- function(y_1, y_0) { t.test(x
+= y_1, y = y_0, alternative = 'greater') %\>% tidy() %\>% select(effect
+= estimate, low_ci = conf.low, p = p.value) } \# run the test on the
+experiment with(experiment, analyze_experiment(y_1, y_0) )
+
+library(broom) set.seed(4172) B \<- 1000 n \<- 1000# number of
+experiments to replicate \# put above experiment into function for
+replication experiment \<- function(n = 1000) { y_0 \<- rnorm(n = n / 2,
+mean = 220, sd = 10) %\>% round(digits = 1) y_1 \<- rnorm(n = n / 2,
+mean = 222, sd = 10) %\>% round(digits = 1) tibble(y_0, y_1 ) } \# per
+notes, which is less intuitive (reads like one experiment, size 60 \*
+1000) d_rep \<- experiment(n = n \* B) %\>% mutate(i = rep(seq(B), each
+= 500) ) \# run test on each experiment results \<- d_rep %\>%
+group_by(i) %\>% summarise( analyze_experiment(y_1, y_0) ) \# same
+summaries as in notes; but can do whatever you want
+mean(results$p < 0.05) summary(results$effect)
+summary(results$low_ci) summary(results$p)
+
+# No Effect
+
+set.seed(329) n \<-1000 \# total experiment sample size \# outcomes for
+control and treatment groups y_0 \<- rnorm(n = n / 2, mean = 220, sd =
+10) %\>% round(digits = 1) y_1 \<- rnorm(n = n / 2, mean = 220, sd = 10)
+%\>% round(digits = 1) experiment \<- tibble(y_0, y_1 ) \# function to
+run statistical test within function \# and grab same results as in
+notes analyze_experiment \<- function(y_1, y_0) { t.test(x = y_1, y =
+y_0, alternative = 'greater') %\>% tidy() %\>% select(effect = estimate,
+low_ci = conf.low, p = p.value) } \# run the test on the experiment
+with(experiment, analyze_experiment(y_1, y_0) )
+
+library(broom) set.seed(4172) B \<- 1000 n \<- 1000# number of
+experiments to replicate \# put above experiment into function for
+replication experiment \<- function(n = 1000) { y_0 \<- rnorm(n = n / 2,
+mean = 220, sd = 10) %\>% round(digits = 1) y_1 \<- rnorm(n = n / 2,
+mean = 220, sd = 10) %\>% round(digits = 1) tibble(y_0, y_1 ) } \# per
+notes, which is less intuitive (reads like one experiment, size 60 \*
+1000) d_rep \<- experiment(n = n \* B) %\>% mutate(i = rep(seq(B), each
+= 500) ) \# run test on each experiment results \<- d_rep %\>%
+group_by(i) %\>% summarise( analyze_experiment(y_1, y_0) ) \# same
+summaries as in notes; but can do whatever you want
+
+mean(results$p < 0.05) summary(results$effect)
+summary(results$low_ci) summary(results$p)
+
+mean(results\$p \< 0.05)
+
+#Q3 \# Sample Size Calculation for RQ# library(pwr) pwr.t.test(d=0.2,
+power = 0.8, alternative = "greater")
+
+# RQ3 Effect Scenario
+
+set.seed(329) n \<-620 \# total experiment sample size \# outcomes for
+control and treatment groups y_0 \<- rnorm(n = n / 2, mean = 220, sd =
+10) %\>% round(digits = 1) y_1 \<- rnorm(n = n / 2, mean = 222, sd = 10)
+%\>% round(digits = 1) experiment \<- tibble(y_0, y_1 ) \# function to
+run statistical test within function \# and grab same results as in
+notes analyze_experiment \<- function(y_1, y_0) { t.test(x = y_1, y =
+y_0, alternative = 'greater') %\>% tidy() %\>% select(effect = estimate,
+low_ci = conf.low, p = p.value) } \# run the test on the experiment
+with(experiment, analyze_experiment(y_1, y_0) )
+
+library(broom) set.seed(4172) B \<- 1000 n \<- 620# number of
+experiments to replicate \# put above experiment into function for
+replication experiment \<- function(n = 620) { y_0 \<- rnorm(n = n / 2,
+mean = 220, sd = 10) %\>% round(digits = 1) y_1 \<- rnorm(n = n / 2,
+mean = 222, sd = 10) %\>% round(digits = 1) tibble(y_0, y_1 ) } \# per
+notes, which is less intuitive (reads like one experiment, size 310 \*
+1000) d_rep \<- experiment(n = n \* B) %\>% mutate(i = rep(seq(B), each
+= 310) ) \# run test on each experiment results \<- d_rep %\>%
+group_by(i) %\>% summarise( analyze_experiment(y_1, y_0) ) \# same
+summaries as in notes; but can do whatever you want
+mean(results$p < 0.05) summary(results$effect)
+summary(results$low_ci) summary(results$p)
+
+\`\`\`
+
+# RQ3 No Effect Scenario
+
+set.seed(329) n \<-620 \# total experiment sample size \# outcomes for
+control and treatment groups y_0 \<- rnorm(n = n / 2, mean = 220, sd =
+10) %\>% round(digits = 1) y_1 \<- rnorm(n = n / 2, mean = 220, sd = 10)
+%\>% round(digits = 1) experiment \<- tibble(y_0, y_1 ) \# function to
+run statistical test within function \# and grab same results as in
+notes analyze_experiment \<- function(y_1, y_0) { t.test(x = y_1, y =
+y_0, alternative = 'greater') %\>% tidy() %\>% select(effect = estimate,
+low_ci = conf.low, p = p.value) } \# run the test on the experiment
+with(experiment, analyze_experiment(y_1, y_0) )
+
+library(broom) set.seed(4172) B \<- 1000 n \<- 620# number of
+experiments to replicate \# put above experiment into function for
+replication experiment \<- function(n = 620) { y_0 \<- rnorm(n = n / 2,
+mean = 220, sd = 10) %\>% round(digits = 1) y_1 \<- rnorm(n = n / 2,
+mean = 220, sd = 10) %\>% round(digits = 1) tibble(y_0, y_1 ) } \# per
+notes, which is less intuitive (reads like one experiment, size 310 \*
+1000) d_rep \<- experiment(n = n \* B) %\>% mutate(i = rep(seq(B), each
+= 310) ) \# run test on each experiment results \<- d_rep %\>%
+group_by(i) %\>% summarise( analyze_experiment(y_1, y_0) ) \# same
+summaries as in notes; but can do whatever you want
+
+mean(results$p < 0.05) summary(results$effect)
+summary(results$low_ci) summary(results$p)
